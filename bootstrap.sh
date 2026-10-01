@@ -205,7 +205,8 @@ if want brew; then
         if (match($0, /"[^"]+"/)) print substr($0, RSTART+1, RLENGTH-2)
       }' "$REPO_DIR/Brewfile")
     if [[ -n "$TAPS" ]]; then
-      log "Trusting third-party taps declared in the Brewfile"
+      (( DRY )) && log "Would trust these third-party taps:" \
+               || log "Trusting third-party taps declared in the Brewfile"
       for t in $TAPS; do
         echo "      $t"
         (( DRY )) && continue
@@ -217,7 +218,10 @@ if want brew; then
 
   if (( DRY )); then
     echo "  would run: brew bundle --file=Brewfile"
-    brew bundle check --file="$REPO_DIR/Brewfile" --verbose 2>/dev/null || true
+    # NOT redirected to /dev/null: showing which packages are missing is the
+    # entire reason to run a dry run. `check` exits non-zero when any are.
+    command -v brew >/dev/null 2>&1 \
+      && { brew bundle check --file="$REPO_DIR/Brewfile" --verbose || true; }
   else
     log "Installing toolchain from Brewfile"
     brew bundle --file="$REPO_DIR/Brewfile" || warn "brew bundle had failures — see above"
