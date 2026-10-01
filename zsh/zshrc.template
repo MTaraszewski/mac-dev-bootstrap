@@ -1,0 +1,46 @@
+# ~/.zshrc template. MERGE this into your own file — do not blindly copy it
+# over a working one.
+#
+# scripts/setup-shell.sh writes only the managed block at the bottom. The
+# oh-my-zsh section here is yours to own, because its ORDER matters and no
+# script should be guessing at your prompt.
+
+# ── oh-my-zsh ────────────────────────────────────────────────────────────
+export ZSH="$HOME/.oh-my-zsh"
+
+# Themes: `ls ~/.oh-my-zsh/themes`. "robbyrussell" is the default,
+# "jonathan" and "agnoster" are fuller (agnoster needs a powerline font).
+ZSH_THEME="robbyrussell"
+
+# zsh-syntax-highlighting MUST be last — it wraps the ZLE widgets that the
+# plugins before it define. Move it and highlighting silently half-works.
+plugins=(
+  git
+  python
+  docker
+  terraform
+  zsh-autosuggestions
+  zsh-syntax-highlighting
+)
+
+source "$ZSH/oh-my-zsh.sh"
+
+# auto_cd (type a folder name + Enter to cd into it) is enabled by oh-my-zsh
+# already — no config needed. The grey inline autofill is zsh-autosuggestions;
+# accept it with Right-arrow or End.
+
+# ── history worth having ─────────────────────────────────────────────────
+HISTSIZE=50000
+SAVEHIST=50000
+setopt HIST_IGNORE_ALL_DUPS   # keep only the most recent copy of a command
+setopt HIST_REDUCE_BLANKS
+setopt SHARE_HISTORY          # new shells see commands from other open shells
+setopt HIST_IGNORE_SPACE      # a leading space keeps a command out of history
+
+# ── everything else is managed ───────────────────────────────────────────
+# >>> mac-dev-bootstrap >>>
+# [ -f "$HOME/path/to/mac-dev-bootstrap/zsh/managed.zsh" ] && source "$HOME/path/to/mac-dev-bootstrap/zsh/managed.zsh"
+# <<< mac-dev-bootstrap <<<
+#
+# setup-shell.sh writes that block with the real path. Do not add it by hand
+# as well, or managed.zsh gets sourced twice.

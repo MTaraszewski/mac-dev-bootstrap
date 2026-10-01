@@ -1,0 +1,17 @@
+// VSCodium + jeanp413.open-remote-ssh ONLY. Merge these three keys into
+// VSCodium's settings.json by hand if you install that extension.
+//
+// DO NOT put these in the shared ide/settings.json: applied to official
+// VS Code they point Microsoft's Remote-SSH at a codium-server binary that
+// does not exist, and it fails to connect.
+//
+// Without them, open-remote-ssh tries to fetch an MS vscode-server that does
+// not match VSCodium and silently fails.
+{
+  "remote.SSH.serverBinaryName": "codium-server",
+  "remote.SSH.serverDownloadUrlTemplate": "https://github.com/VSCodium/vscodium/releases/download/${version}.${release}/vscodium-reh-${os}-${arch}-${version}.${release}.tar.gz",
+  "remote.SSH.serverVersion": "latest"
+}
+// GOTCHA, worth an hour of anyone's time: the REMOTE host needs
+// `AllowTcpForwarding yes` in /etc/ssh/sshd_config. If it is `no`, the
+// extension fails while plain `ssh` in a terminal works fine.

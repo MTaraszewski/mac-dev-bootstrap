@@ -1,0 +1,67 @@
+# Extensions installed by scripts/setup-ide.sh.
+#
+# Everything uncommented here exists on BOTH registries — Open VSX (which
+# VSCodium must use) and the MS Marketplace (official VS Code). That is the
+# constraint that shapes this list: VSCodium cannot legally use the
+# Marketplace, so a Marketplace-only extension is simply unavailable there.
+#
+# One id per line. Comments and blanks are stripped. Check with:
+#     ./scripts/setup-ide.sh --list
+
+# ── AI ───────────────────────────────────────────────────────────────────
+# Anthropic publishes to Open VSX, so this works in VSCodium. Cloud-based:
+# code it is asked about goes to Anthropic's API. Comment out until you have
+# sign-off for company code.
+anthropic.claude-code
+
+# ── python ───────────────────────────────────────────────────────────────
+ms-python.python                   # MIT, on Open VSX. (Pylance is NOT.)
+ms-python.debugpy
+charliermarsh.ruff                 # lint + format, picks up some Pylance slack
+njpwerner.autodocstring
+kevinrose.vsc-python-indent
+
+# ── jupyter ──────────────────────────────────────────────────────────────
+ms-toolsai.jupyter
+ms-toolsai.jupyter-keymap
+ms-toolsai.jupyter-renderers
+
+# ── web / node ───────────────────────────────────────────────────────────
+dbaeumer.vscode-eslint
+esbenp.prettier-vscode
+
+# ── rust ─────────────────────────────────────────────────────────────────
+rust-lang.rust-analyzer
+
+# ── infra ────────────────────────────────────────────────────────────────
+hashicorp.terraform
+github.vscode-github-actions
+ms-azuretools.vscode-containers    # current MS docker ext (renamed from vscode-docker)
+
+# ── data / db ────────────────────────────────────────────────────────────
+mtxr.sqltools
+mtxr.sqltools-driver-pg
+
+# ── git ──────────────────────────────────────────────────────────────────
+eamodio.gitlens
+
+# ── markdown / config formats ────────────────────────────────────────────
+yzhang.markdown-all-in-one
+davidanson.vscode-markdownlint
+redhat.vscode-yaml
+tamasfe.even-better-toml
+
+# ── theme ────────────────────────────────────────────────────────────────
+PKief.material-icon-theme          # what settings.json's iconTheme expects
+
+# ── optional ─────────────────────────────────────────────────────────────
+# jeanp413.open-remote-ssh         # VSCodium's Remote-SSH replacement.
+#                                  # ALSO merge ide/settings.vscodium-remote-ssh.json
+# bmewburn.vscode-intelephense-client   # PHP
+# vue.volar
+# mermaidchart.vscode-mermaid-chart
+#
+# Marketplace-ONLY — these will fail on VSCodium, by licence not by accident:
+#   GitHub.copilot, ms-python.vscode-pylance, ms-dotnettools.csdevkit,
+#   ms-vscode-remote.remote-ssh, ms-vscode-remote.remote-containers,
+#   atommaterial.a-file-icon-vscode

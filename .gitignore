@@ -1,0 +1,23 @@
+# Logs carry hostnames, absolute paths, and whatever the redactor missed.
+# The ledger is machine-specific too. Never commit.
+#
+# NOTE the trailing /* rather than /. Excluding the DIRECTORY stops git
+# descending into it at all, so a later !logs/.gitkeep negation never gets
+# considered and the empty dir vanishes from the repo. Excluding its CONTENTS
+# leaves the negation reachable.
+logs/*
+!logs/.gitkeep
+
+# Survey snapshots name the machine they ran on.
+state/*
+!state/.gitkeep
+
+# Local overrides — your machine's deviations from the committed defaults.
+# Brewfile.local is installed if present; *.local is never committed.
+*.local
+!*.local.example
+
+.DS_Store
+.venv/
+__pycache__/
+node_modules/

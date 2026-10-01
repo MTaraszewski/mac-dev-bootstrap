@@ -1,0 +1,30 @@
+# Per-directory git identity. Append to ~/.gitconfig, then create the two
+# included files. Nothing in this repo needs your email — this is the
+# mechanism that keeps it that way.
+#
+# The TRAILING SLASH on each gitdir pattern is required. Without it the
+# pattern matches nothing and you get silent, wrong-author commits.
+# Order matters: the LAST matching include wins.
+
+[includeIf "gitdir:~/work/"]
+    path = ~/.gitconfig-work
+
+[includeIf "gitdir:~/personal/"]
+    path = ~/.gitconfig-personal
+
+# ── ~/.gitconfig-work ────────────────────────────────────────────────────
+# [user]
+#     name  = Your Name
+#     email = you@corp.example
+# [core]
+#     sshCommand = ssh -i ~/.ssh/id_work
+#
+# ── ~/.gitconfig-personal ────────────────────────────────────────────────
+# [user]
+#     name  = Your Name
+#     email = you@personal.example
+# [core]
+#     sshCommand = ssh -i ~/.ssh/id_personal
+#
+# Verify which identity a repo resolved to:
+#     git -C ~/work/some-repo config user.email

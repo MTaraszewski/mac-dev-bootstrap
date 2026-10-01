@@ -1,0 +1,5 @@
+marker for find_root() in bootstrap.sh and scripts/*.sh
+
+Portability note: these scripts are macOS-only and assume BSD userland.
+Do NOT use GNU-only regex (\s, \d, \+) in sed/grep — BSD sed silently no-ops
+instead of erroring, so the bug is invisible. Use [[:space:]] or awk.
