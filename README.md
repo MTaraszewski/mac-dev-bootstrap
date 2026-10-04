@@ -4,9 +4,8 @@ Reproducible setup for a macOS development machine. Clone it, run one script,
 get a working toolchain. Re-run it any time — it is idempotent, and it resumes
 rather than restarting.
 
-Built to be safe on a **company-managed Mac**: it never touches credentials,
-never commits an identity, and every step says what it changes before it
-changes it.
+It never touches credentials, never commits an identity, and every step says
+what it changes before it changes it.
 
 **What it is not:** a local-model / GPU stack. No Ollama, no model weights, no
 `iogpu.wired_limit_mb`. That belongs in its own repo.
@@ -83,33 +82,6 @@ Three promises the scripts actually keep:
   `~/.netrc`, `~/.pgpass`, `~/.gnupg`. No identity is committed: name and email
   come from `GIT_USER_NAME` / `GIT_USER_EMAIL` at run time, or not at all.
   `logs/` and `state/` are gitignored because they name the machine.
-
----
-
-## On a company-managed Mac
-
-Clear these before you run anything:
-
-- **OrbStack needs a paid licence for commercial use** beyond a small-company
-  exemption. Free alternatives with the same `docker` CLI: `colima`, `podman` —
-  [`scripts/lib/docker.sh`](scripts/lib/docker.sh) finds a docker binary from any
-  of them, so only `setup-orbstack.sh` is OrbStack-specific.
-- **AI coding tools on company code usually need sign-off.** `claude-code` is in
-  the Brewfile and `anthropic.claude-code` in the extension list. Both are
-  cloud-based — code they are asked about goes to Anthropic's API. Comment them
-  out until you have the go-ahead.
-- **Homebrew needs admin rights** for its first install, and some fleets manage
-  brew centrally. A second Homebrew is a genuinely bad time; `survey.sh` checks
-  for one.
-- **A proxy or TLS-inspecting middlebox** breaks `brew`, `curl | sh` installers
-  and `git clone` with errors that never mention a proxy. `survey.sh` reports
-  proxy env vars and system/PAC settings.
-- **MDM config profiles can override** your shell, git and app settings after
-  the fact. `survey.sh` reports enrollment status.
-
-`survey.sh` checks all of the above read-only, and `./bootstrap.sh --dry-run`
-prints the plan without touching anything. Use both before you ask IT anything —
-the answers are easier to get when you can say precisely what will change.
 
 ---
 
