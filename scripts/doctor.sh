@@ -201,6 +201,23 @@ else
     || ok "GPU cap ${cap}MB"
 fi
 
+hdr "openai tools (opt-in)"
+if [[ ! -d /Applications/ChatGPT.app ]] && ! command -v codex >/dev/null 2>&1; then
+  skip "not installed  (./bootstrap.sh --only openai)"
+else
+  [[ -d /Applications/ChatGPT.app ]] && ok "ChatGPT.app" || skip "ChatGPT.app absent"
+  if command -v codex >/dev/null 2>&1; then
+    ok "codex $(codex --version 2>/dev/null | head -1)"
+    # Same PATH trap as claude-code: two installs, different versions.
+    if npm ls -g --depth=0 2>/dev/null | grep -q "@openai/codex"; then
+      bad "codex installed via BOTH brew and npm — PATH decides which you get"
+      hint "npm uninstall -g @openai/codex"
+    fi
+  else
+    skip "codex CLI absent"
+  fi
+fi
+
 printf "\n\033[1m%d passed, %d failed, %d skipped\033[0m\n" "$PASS" "$FAIL" "$SKIP"
 if (( FAIL )); then
   echo "Each ✗ above carries the command that fixes it. bootstrap.sh is idempotent —"

@@ -57,6 +57,7 @@ declare_desc() {
     ide)      echo "VSCodium/VS Code settings + extensions, telemetry off" ;;
     iterm)    echo "iTerm2 Dynamic Profile (declarative, read-only in the UI)" ;;
     local-ai) echo "Ollama + local model weights (tens of GB) — OPT-IN" ;;
+    openai)   echo "ChatGPT desktop app + Codex CLI — OPT-IN" ;;
   esac
 }
 
@@ -64,7 +65,7 @@ declare_desc() {
 # named in --only. local-ai downloads tens of gigabytes and sets a user-wide
 # launchd environment; that should never happen because someone ran the
 # default command.
-OPT_IN=(local-ai)
+OPT_IN=(local-ai openai)
 
 ONLY=""; SKIP=""; DRY=0
 while (( $# )); do
@@ -267,6 +268,7 @@ run_module orbstack "$REPO_DIR/scripts/setup-orbstack.sh"
 run_module ide      "$REPO_DIR/scripts/setup-ide.sh"
 run_module iterm    "$REPO_DIR/scripts/setup-iterm.sh"
 run_module local-ai "$REPO_DIR/scripts/setup-local-ai.sh"
+run_module openai   "$REPO_DIR/scripts/setup-openai.sh"
 
 step "done"
 if (( DRY )); then

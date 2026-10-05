@@ -1,0 +1,26 @@
+# Installed ONLY by scripts/setup-openai.sh, never by ./bootstrap.sh.
+#
+# Separate from the main Brewfile for the same reason as Brewfile.local-ai:
+# `brew bundle` has no conditionals, so a single Brewfile cannot offer
+# anything as opt-in.
+#
+#   brew bundle --file=Brewfile.openai
+
+# ChatGPT desktop app → /Applications/ChatGPT.app. Needs macOS 13+.
+cask "chatgpt"
+
+# Codex CLI — OpenAI's terminal coding agent.
+#
+# NOT via npm, for the same reason claude-code is a cask: an npm global lives
+# inside the ACTIVE nvm version's directory, so `nvm use 22` makes the command
+# vanish. The cask is independent of node entirely, and needs no Node at all.
+#
+# If you ever do use the npm path, the package is SCOPED:
+#     npm install -g @openai/codex        ← correct
+#     npm install -g codex                ← an unrelated package from 2012,
+#                                           installs with no error or warning
+cask "codex"
+
+# Tradeoff shared by both: brew casks do not auto-update, so
+# `brew upgrade chatgpt codex` occasionally. The ChatGPT app does
+# self-update, so in practice only codex needs it.

@@ -2,8 +2,9 @@
 
 Reproducible setup for a macOS development machine. Idempotent — safe to re-run.
 
-Local models are an **opt-in module** — `./bootstrap.sh` alone installs no
-weights and no Ollama. See [Local AI](#local-ai-opt-in).
+Local models (Ollama) and the OpenAI tools (ChatGPT app, Codex) are **opt-in
+modules** — `./bootstrap.sh` alone installs neither.
+See [opt-in modules](#opt-in-modules).
 
 ```sh
 ./scripts/survey.sh          # read-only: what's here, what will block
@@ -81,11 +82,40 @@ Env opt-outs: `NO_LOG` `SKIP_SURVEY` `SKIP_TAP_TRUST` `SKIP_ZSHRC`
 
 ---
 
-## Local AI (opt-in)
+## Opt-in modules
 
-Not part of the default run — it downloads tens of GB and sets a user-wide
-launchd environment, which shouldn't happen because someone ran the default
-command. It only runs when named:
+Never run by a plain `./bootstrap.sh` — they only run when named in `--only`,
+and the default run doesn't even mention them.
+
+| module | installs |
+|---|---|
+| `local-ai` | Ollama + model weights, GPU/memory tooling — tens of GB |
+| `openai` | ChatGPT desktop app + Codex CLI |
+
+```sh
+./bootstrap.sh --only openai           # or: ./scripts/setup-openai.sh
+./bootstrap.sh --only local-ai
+```
+
+### openai
+
+`cask "chatgpt"` + `cask "codex"` from `Brewfile.openai`. Codex is a cask
+rather than `npm i -g @openai/codex` for the same reason as `claude-code`: an
+npm global lives inside the active nvm version's directory, so `nvm use 22`
+makes the command vanish.
+
+Authentication is interactive and the script deliberately sets no key — run
+`codex` and follow the prompt (ChatGPT account, or `OPENAI_API_KEY` for
+per-token billing). If you use a key, put it in a per-project `.envrc` so
+`direnv` loads it on `cd` and unloads it on the way out.
+
+This sits alongside `claude-code` from the default run; they don't conflict.
+
+### local-ai
+
+Downloads tens of GB and sets a user-wide launchd environment — neither
+should happen because someone ran the default command. It only runs when
+named:
 
 ```sh
 ./scripts/setup-local-ai.sh --plan     # print the plan, change nothing
