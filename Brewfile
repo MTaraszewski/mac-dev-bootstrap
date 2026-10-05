@@ -123,10 +123,6 @@ cask "vscodium"
 # brew "mongosh"         # needs: tap "mongodb/brew"
 # brew "rabbitmq"
 # brew "tcptraceroute"
-# brew "ffmpeg"
-# brew "yt-dlp"
-# brew "graphviz"
-# brew "qemu"
 # brew "openvpn"         # usually a managed client on a work Mac
 # cask "rectangle"       # window manager
 # cask "postman"

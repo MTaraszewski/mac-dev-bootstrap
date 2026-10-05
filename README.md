@@ -56,9 +56,9 @@ redhat.vscode-yaml  tamasfe.even-better-toml  PKief.material-icon-theme
 ```
 
 Commented out and ready in the Brewfile: `bat` `fd` `eza` `mongosh` `rabbitmq`
-`tcptraceroute` `ffmpeg` `yt-dlp` `graphviz` `qemu` `openvpn` `rectangle`
-`postman` `opentofu` `awscli`. Machine-specific extras go in `Brewfile.local`
-(gitignored, installed automatically).
+`tcptraceroute` `openvpn` `rectangle` `postman` `opentofu` `awscli`.
+Machine-specific extras go in `Brewfile.local` (gitignored, installed
+automatically).
 
 ---
 
