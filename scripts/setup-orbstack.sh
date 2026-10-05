@@ -5,10 +5,8 @@
 #   ./scripts/setup-orbstack.sh
 #   ORB_MEMORY_MIB=8192 ORB_CPU=6 ORB_K8S=1 ./scripts/setup-orbstack.sh
 #
-# ⚠ LICENCE: OrbStack needs a PAID licence for commercial use beyond a
-#   small-company exemption. On a company Mac, clear that first.
-#   Free alternatives with the same CLI: colima, podman. lib/docker.sh finds
-#   a docker binary from any of them, so only this script is OrbStack-specific.
+# Only this script is OrbStack-specific — lib/docker.sh finds a docker binary
+# from colima or podman too, if you ever swap.
 set -uo pipefail
 
 find_root() {
@@ -30,9 +28,9 @@ die()  { printf "\033[1;31mERR\033[0m %s\n" "$*"; exit 1; }
 source "$REPO_DIR/scripts/lib/log.sh" 2>/dev/null && log_init setup-orbstack "$@"
 
 if [[ ! -d "/Applications/OrbStack.app" ]]; then
-  warn "OrbStack not installed — skipping."
-  warn "  Using colima instead?  brew install colima docker docker-compose"
-  warn "  then: colima start --cpu 4 --memory 8 --vm-type vz --vz-rosetta"
+  warn "OrbStack not installed — the Brewfile should have installed it."
+  warn "  Install it:  brew install --cask orbstack"
+  warn "  Then re-run: ./bootstrap.sh --only orbstack"
   exit 0
 fi
 

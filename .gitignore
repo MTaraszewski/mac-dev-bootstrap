@@ -21,3 +21,6 @@ state/*
 .venv/
 __pycache__/
 node_modules/
+
+# raw model weights, if you ever download one by hand
+*.gguf

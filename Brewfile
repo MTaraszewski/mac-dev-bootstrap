@@ -69,15 +69,13 @@ brew "php"               # drop if you do not write PHP
 # ═════════════════════════════════════════════════════════════════════════
 # CONTAINERS
 # ═════════════════════════════════════════════════════════════════════════
-# ⚠ LICENCE: OrbStack requires a PAID licence for commercial use beyond a
-#   small-company exemption. On a company-owned Mac, clear this with IT
-#   before running. Free alternatives, same `docker` CLI:
-#       brew "colima" + brew "docker" + brew "docker-compose"
-#       brew "podman"
-#   scripts/lib/docker.sh finds a docker binary from any of them.
+# OrbStack: lighter and faster than Docker Desktop on Apple Silicon, and free
+# for personal use.
 #
 # ONE runtime only. docker-desktop + orbstack + podman all provide `docker`
-# and fight over the socket.
+# and fight over the socket. (If you ever do swap, scripts/lib/docker.sh finds
+# a docker binary from colima or podman too — only setup-orbstack.sh is
+# OrbStack-specific.)
 cask "orbstack"
 
 # ═════════════════════════════════════════════════════════════════════════
