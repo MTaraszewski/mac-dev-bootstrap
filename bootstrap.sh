@@ -187,9 +187,10 @@ chmod +x "$REPO_DIR"/scripts/*.sh 2>/dev/null || true
 run_module() { # run_module <name> <script> [args...]
   local name="$1"; shift
   if ! want "$name"; then
-    # Don't announce opt-in modules on a default run — they were never going
-    # to run, so "skipping" would read as though something was wrong.
-    is_opt_in "$name" && [[ -z "$ONLY" ]] && return 0
+    # Never announce an opt-in module that was not explicitly named — it was
+    # never going to run, so "skipping" would read as though something was
+    # wrong. Covers both a default run and `--only <the other opt-in module>`.
+    is_opt_in "$name" && ! in_list "$name" "$ONLY" && return 0
     printf "  \033[2m· skipping %s\033[0m\n" "$name"
     return 0
   fi

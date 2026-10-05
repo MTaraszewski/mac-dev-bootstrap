@@ -128,7 +128,7 @@ Brewfile stays model-free), sets six `OLLAMA_*` vars via `launchctl`, pulls a
 model manifest, and builds the derived models in `modelfiles/`.
 
 Which manifest is picked from RAM, by `lib/host.sh`: `models.conf` (~10GB,
-fits 24GB) or `models.big.conf` (~29GB, machines with 48GB+). Override with
+fits 24GB) or `models.big.conf` (~48GB, machines with 48GB+ RAM). Override with
 `MODELS_CONF=`.
 
 | script | |
