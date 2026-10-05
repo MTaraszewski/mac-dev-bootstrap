@@ -12,7 +12,7 @@
 #   SKIP_TAP_TRUST=1   don't `brew trust` third-party taps
 #   SKIP_ZSHRC=1       don't touch ~/.zshrc
 #   SKIP_SURVEY=1      don't gate on the preflight survey
-#   GIT_USER_NAME= GIT_USER_EMAIL=   set the git identity (otherwise untouched)
+#   GIT_USER_NAME= GIT_USER_EMAIL=   identity for --only git (opt-in module)
 #   NODE_VERSION=24    nvm default
 #   ORB_MEMORY_MIB=8192 ORB_CPU=6 ORB_K8S=1
 #
@@ -46,13 +46,13 @@ die()  { printf "\033[1;31mERR\033[0m %s\n" "$*"; exit 1; }
 
 # ── modules ──────────────────────────────────────────────────────────────
 # Order matters: brew provides the tools the rest assume.
-MODULES=(brew shell runtimes git orbstack ide iterm)
+MODULES=(brew shell runtimes orbstack ide iterm)
 declare_desc() {
   case "$1" in
     brew)     echo "Homebrew + tap trust + everything in the Brewfile" ;;
     shell)    echo "oh-my-zsh, plugins, login shell, managed ~/.zshrc block" ;;
     runtimes) echo "uv (python), nvm (node), rustup (rust)" ;;
-    git)      echo "git defaults + identity (only if GIT_USER_* is set)" ;;
+    git)      echo "git global defaults + identity — OPT-IN, touches ~/.gitconfig" ;;
     orbstack) echo "docker CLI + compose plugin, resource caps, k8s off" ;;
     ide)      echo "VSCodium/VS Code settings + extensions, telemetry off" ;;
     iterm)    echo "iTerm2 Dynamic Profile (declarative, read-only in the UI)" ;;
@@ -62,10 +62,14 @@ declare_desc() {
 }
 
 # Opt-in modules never run as part of a plain ./bootstrap.sh. They have to be
-# named in --only. local-ai downloads tens of gigabytes and sets a user-wide
-# launchd environment; that should never happen because someone ran the
-# default command.
-OPT_IN=(local-ai openai)
+# named in --only, because each one changes something that should never be a
+# side effect of the default command:
+#   git       writes your ~/.gitconfig. If you use includeIf to pick an
+#             identity per directory, a global identity is the wrong answer
+#             and this would overwrite a setup you chose deliberately.
+#   local-ai  downloads tens of gigabytes, sets a user-wide launchd env.
+#   openai    installs a second AI assistant alongside claude-code.
+OPT_IN=(git local-ai openai)
 
 ONLY=""; SKIP=""; DRY=0
 while (( $# )); do
@@ -264,10 +268,10 @@ fi
 
 run_module shell    "$REPO_DIR/scripts/setup-shell.sh"
 run_module runtimes "$REPO_DIR/scripts/setup-runtimes.sh"
-run_module git      "$REPO_DIR/scripts/setup-git.sh"
 run_module orbstack "$REPO_DIR/scripts/setup-orbstack.sh"
 run_module ide      "$REPO_DIR/scripts/setup-ide.sh"
 run_module iterm    "$REPO_DIR/scripts/setup-iterm.sh"
+run_module git      "$REPO_DIR/scripts/setup-git.sh"
 run_module local-ai "$REPO_DIR/scripts/setup-local-ai.sh"
 run_module openai   "$REPO_DIR/scripts/setup-openai.sh"
 

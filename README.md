@@ -71,7 +71,6 @@ automatically).
 | `brew` | Homebrew, tap trust, the Brewfile, then `Brewfile.local` |
 | `shell` | oh-my-zsh + plugins, `chsh`, one managed block in `~/.zshrc` |
 | `runtimes` | uv, nvm + Node, rustup |
-| `git` | global defaults — only keys you haven't set yourself |
 | `orbstack` | resource caps, k8s off, `docker` on PATH, compose plugin linked |
 | `ide` | `settings.json` + extensions, telemetry off |
 | `iterm` | symlinks the `dev` Dynamic Profile |
@@ -87,15 +86,33 @@ Env opt-outs: `NO_LOG` `SKIP_SURVEY` `SKIP_TAP_TRUST` `SKIP_ZSHRC`
 Never run by a plain `./bootstrap.sh` — they only run when named in `--only`,
 and the default run doesn't even mention them.
 
-| module | installs |
+| module | does |
 |---|---|
+| `git` | writes global git defaults + identity to `~/.gitconfig` |
 | `local-ai` | Ollama + model weights, GPU/memory tooling — tens of GB |
 | `openai` | ChatGPT desktop app + Codex CLI |
 
 ```sh
+./bootstrap.sh --only git              # or: ./scripts/setup-git.sh
 ./bootstrap.sh --only openai           # or: ./scripts/setup-openai.sh
 ./bootstrap.sh --only local-ai
 ```
+
+### git
+
+Opt-in because it writes `~/.gitconfig`. If you pick your identity per
+directory with `includeIf`, a *global* identity is the wrong answer — whichever
+address you set becomes the catch-all for every uncovered directory. Leave this
+module alone if your git config is already how you want it.
+
+Pass the identity explicitly; nothing is committed to this repo:
+
+```sh
+GIT_USER_NAME="Your Name" GIT_USER_EMAIL=you@example.com ./scripts/setup-git.sh
+```
+
+It also sets ten defaults (`pull.ff=only`, `fetch.prune`, `push.autoSetupRemote`,
+`rerere.enabled`, …), each only if you have not already set it yourself.
 
 ### openai
 
@@ -165,7 +182,7 @@ cannot be fast, however you configure it.
 login shell                 chsh -s /bin/zsh
 .../{VSCodium,Code}/User/settings.json       (+ .bak.<epoch>)
 .../iTerm2/DynamicProfiles/                  symlink into this repo
-git --global                only keys you had not already set
+git --global                only via --only git, and only unset keys
 ```
 
 **No credentials, anywhere.** Nothing reads or writes `~/.ssh`, `~/.aws`,
