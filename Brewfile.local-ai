@@ -1,0 +1,18 @@
+# Installed ONLY by scripts/setup-local-ai.sh, never by ./bootstrap.sh.
+#
+# Kept out of the main Brewfile on purpose: `brew bundle` has no conditionals,
+# so a single Brewfile cannot offer local models as opt-in. This is the whole
+# reason the file is separate.
+#
+#   brew bundle --file=Brewfile.local-ai
+
+# Native Metal inference + an OpenAI-compatible API on :11434.
+# NOT a container: Docker on macOS runs in a Linux VM with no Metal
+# passthrough, so a containerized Ollama is CPU-only and roughly an order of
+# magnitude slower. Runs on the host; containers reach it at
+# host.docker.internal:11434.
+cask "ollama-app"
+
+# Optional GUI for browsing quantisations, and better tool-calling in
+# streaming mode than Ollama has had. Not needed for anything here.
+# cask "lm-studio"

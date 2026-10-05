@@ -56,8 +56,15 @@ declare_desc() {
     orbstack) echo "docker CLI + compose plugin, resource caps, k8s off" ;;
     ide)      echo "VSCodium/VS Code settings + extensions, telemetry off" ;;
     iterm)    echo "iTerm2 Dynamic Profile (declarative, read-only in the UI)" ;;
+    local-ai) echo "Ollama + local model weights (tens of GB) — OPT-IN" ;;
   esac
 }
+
+# Opt-in modules never run as part of a plain ./bootstrap.sh. They have to be
+# named in --only. local-ai downloads tens of gigabytes and sets a user-wide
+# launchd environment; that should never happen because someone ran the
+# default command.
+OPT_IN=(local-ai)
 
 ONLY=""; SKIP=""; DRY=0
 while (( $# )); do
@@ -65,6 +72,8 @@ while (( $# )); do
     --list)
       printf "modules (in run order):\n"
       for m in "${MODULES[@]}"; do printf "  %-9s %s\n" "$m" "$(declare_desc "$m")"; done
+      printf "\nopt-in (only via --only):\n"
+      for m in "${OPT_IN[@]}"; do printf "  %-9s %s\n" "$m" "$(declare_desc "$m")"; done
       exit 0 ;;
     --only) ONLY="${2:-}"; shift ;;
     --only=*) ONLY="${1#*=}" ;;
@@ -81,8 +90,18 @@ in_list() { # in_list needle csv
   case ",$2," in *",$1,"*) return 0 ;; esac
   return 1
 }
+is_opt_in() {
+  local m
+  for m in "${OPT_IN[@]}"; do [[ "$m" == "$1" ]] && return 0; done
+  return 1
+}
 want() {
-  [[ -n "$ONLY" ]] && { in_list "$1" "$ONLY" || return 1; }
+  # An opt-in module runs only when it is named explicitly in --only.
+  if is_opt_in "$1"; then
+    [[ -n "$ONLY" ]] && in_list "$1" "$ONLY" || return 1
+  else
+    [[ -n "$ONLY" ]] && { in_list "$1" "$ONLY" || return 1; }
+  fi
   [[ -n "$SKIP" ]] && { in_list "$1" "$SKIP" && return 1; }
   return 0
 }
@@ -92,7 +111,7 @@ want() {
 for given in $(printf '%s' "${ONLY},${SKIP}" | tr ',' ' '); do
   [[ -z "$given" ]] && continue
   found=0
-  for m in "${MODULES[@]}"; do [[ "$m" == "$given" ]] && found=1; done
+  for m in "${MODULES[@]}" "${OPT_IN[@]}"; do [[ "$m" == "$given" ]] && found=1; done
   (( found )) || die "no such module: $given  (./bootstrap.sh --list)"
 done
 
@@ -166,7 +185,13 @@ chmod +x "$REPO_DIR"/scripts/*.sh 2>/dev/null || true
 
 run_module() { # run_module <name> <script> [args...]
   local name="$1"; shift
-  want "$name" || { printf "  \033[2m· skipping %s\033[0m\n" "$name"; return 0; }
+  if ! want "$name"; then
+    # Don't announce opt-in modules on a default run — they were never going
+    # to run, so "skipping" would read as though something was wrong.
+    is_opt_in "$name" && [[ -z "$ONLY" ]] && return 0
+    printf "  \033[2m· skipping %s\033[0m\n" "$name"
+    return 0
+  fi
   step "$name — $(declare_desc "$name")"
   if (( DRY )); then
     echo "  would run: $*"
@@ -241,6 +266,7 @@ run_module git      "$REPO_DIR/scripts/setup-git.sh"
 run_module orbstack "$REPO_DIR/scripts/setup-orbstack.sh"
 run_module ide      "$REPO_DIR/scripts/setup-ide.sh"
 run_module iterm    "$REPO_DIR/scripts/setup-iterm.sh"
+run_module local-ai "$REPO_DIR/scripts/setup-local-ai.sh"
 
 step "done"
 if (( DRY )); then

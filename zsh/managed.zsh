@@ -57,6 +57,16 @@ if command -v fzf >/dev/null; then
   fi
 fi
 
+# ── ollama (only if the local-ai module was run) ─────────────────────────
+# setup-local-ai.sh also sets these via `launchctl setenv`, which is what
+# Ollama.app reads — it is started by launchd and never sees a shell env.
+# These cover anything you launch from a terminal. Keep the two in sync.
+if [ -d "/Applications/Ollama.app" ]; then
+  export OLLAMA_FLASH_ATTENTION=1
+  export OLLAMA_KV_CACHE_TYPE=q8_0
+  export OLLAMA_KEEP_ALIVE=3m
+fi
+
 # ── aliases ──────────────────────────────────────────────────────────────
 # `assume` must be SOURCED, not executed: it exports AWS credentials into the
 # current shell, and a subprocess cannot do that to its parent.

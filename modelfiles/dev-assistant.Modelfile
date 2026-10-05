@@ -1,0 +1,26 @@
+# A pinned, versioned model config. This is the part worth keeping in git:
+# the weights are a cache you can re-pull, the CONFIG is your actual artifact.
+#
+#   ollama create dev-assistant -f modelfiles/dev-assistant.Modelfile
+#   ollama run dev-assistant
+
+FROM qwen2.5-coder:14b
+
+# 8K is a sane default for interactive chat. Raise toward the model's native
+# window only when you need it — a very large context will eat more memory
+# than the weights do. See the KV-cache arithmetic in agent.Modelfile.
+PARAMETER num_ctx 8192
+PARAMETER temperature 0.3
+PARAMETER top_p 0.9
+
+# Leave num_gpu unset. Ollama offloads all layers to Metal automatically, and
+# setting it wrong is a common way to land silently on the CPU.
+
+SYSTEM """
+You are a backend engineering assistant. Be concise and concrete.
+Prefer showing code over describing it. State assumptions explicitly.
+When you are unsure, say so rather than inventing an API.
+"""
+
+# NOTE: this is the CHAT/EDIT model. Do not point autocomplete at it — that
+# needs a fill-in-the-middle model. See models.conf.

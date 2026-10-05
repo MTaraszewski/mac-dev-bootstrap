@@ -1,0 +1,45 @@
+# Agent model: same weights as chat, MUCH bigger context window.
+#
+#   ollama create agent -f modelfiles/agent.Modelfile
+#   (setup-local-ai.sh builds this automatically if the base is present)
+#
+# ── WHY THIS FILE EXISTS ─────────────────────────────────────────────────
+# Ollama defaults num_ctx to roughly 2-4K tokens. An agent blows past that
+# within a few tool calls — system prompt + file contents + diffs + command
+# output add up fast. When it overflows, Ollama does NOT error: it SILENTLY
+# TRUNCATES. The agent then forgets its own plan, re-reads files it just
+# read, and loops. It looks like a stupid model. It has amnesia.
+#
+# This is the single most common way a local agent setup fails.
+#
+# ── THE COST: KV cache is RAM ────────────────────────────────────────────
+# Context is not free. For a 14B at q8_0 the KV cache runs roughly
+# ~100KB/token, on top of the weights:
+#
+#     16K ctx  ~= 1.6GB    <- safe starting point
+#     32K ctx  ~= 3.2GB    <- fits on 24GB, but evict other models
+#     64K ctx  ~= 6.4GB    <- needs a raised GPU cap
+#
+# Check reality rather than trusting the arithmetic:
+#     ./scripts/model.sh free && ./scripts/ram.sh
+#
+# 16K is the recommended floor for agent work. Start there, raise if needed.
+
+FROM qwen2.5-coder:14b
+
+PARAMETER num_ctx 16384
+PARAMETER temperature 0.1
+PARAMETER top_p 0.9
+
+# Agents need determinism more than flair — they follow a plan rather than
+# writing prose, and low temperature also reduces malformed tool calls.
+
+SYSTEM """
+You are a coding agent operating on a real repository.
+
+Read before you write. Prefer the smallest change that solves the problem.
+Follow the existing style of the file you are editing.
+State assumptions explicitly. If you are unsure, say so rather than inventing
+an API or a file path.
+After editing, verify: run the test or the command that proves it works.
+"""

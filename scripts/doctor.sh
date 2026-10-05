@@ -175,6 +175,32 @@ else
   skip "iTerm2 not installed"
 fi
 
+hdr "local ai (opt-in)"
+# Silent unless the module was actually run — a machine that never asked for
+# local models should not be told it is missing them.
+if [[ ! -d /Applications/Ollama.app ]]; then
+  skip "not installed  (./bootstrap.sh --only local-ai)"
+else
+  if curl -fsS http://127.0.0.1:11434/api/version >/dev/null 2>&1; then
+    ok "Ollama API on :11434"
+  else
+    bad "Ollama.app installed but the API is not answering"
+    hint "open -a Ollama and finish any first-run prompts"
+  fi
+  # The launchd env is what Ollama.app reads; a shell export does not reach it.
+  for k in OLLAMA_FLASH_ATTENTION OLLAMA_KV_CACHE_TYPE OLLAMA_KEEP_ALIVE; do
+    v="$(launchctl getenv "$k" 2>/dev/null)"
+    [[ -n "$v" ]] && ok "$k=$v" || { bad "$k unset in the launchd env"; hint "./scripts/setup-local-ai.sh"; }
+  done
+  n="$(ollama list 2>/dev/null | tail -n +2 | grep -c . | tr -d ' ')"
+  [[ "${n:-0}" -gt 0 ]] && ok "$n models local" || skip "no models pulled yet"
+  # A set cap is optional, but worth saying out loud since it resets on reboot.
+  cap="$(sysctl -n iogpu.wired_limit_mb 2>/dev/null || echo 0)"
+  [[ "$cap" == "0" ]] \
+    && skip "GPU cap at the system default  (./scripts/gpu-limit.sh)" \
+    || ok "GPU cap ${cap}MB"
+fi
+
 printf "\n\033[1m%d passed, %d failed, %d skipped\033[0m\n" "$PASS" "$FAIL" "$SKIP"
 if (( FAIL )); then
   echo "Each ✗ above carries the command that fixes it. bootstrap.sh is idempotent —"
