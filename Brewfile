@@ -100,10 +100,18 @@ cask "aws-vault-binary"              # NOT `aws-vault`; that name is a
 #   it is asked about to Anthropic's API — it is NOT local. Comment both of
 #   these out until you have the go-ahead.
 #
+# Claude Code — the terminal coding agent.
 # NOT via npm: an npm-installed `claude` lives inside nvm's version directory,
 # so `nvm use 20` makes it vanish. The cask is independent of node.
 # Tradeoff: casks do not auto-update — `brew upgrade claude-code` now and then.
 cask "claude-code"
+
+# Claude desktop app → /Applications/Claude.app. A DIFFERENT product from
+# claude-code, and a different cask: `claude` is the GUI chat client,
+# `claude-code` is the CLI. Installing one does not give you the other, and
+# the names are close enough that it is worth saying so out loud.
+# This one does self-update, so brew upgrade is not needed for it.
+cask "claude"
 
 # Editor. VSCodium is the MIT VS Code source built without Microsoft's
 # telemetry endpoints (which are injected at BUILD time, so the official

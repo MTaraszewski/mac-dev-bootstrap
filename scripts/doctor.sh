@@ -218,6 +218,26 @@ else
     || ok "GPU cap ${cap}MB"
 fi
 
+hdr "anthropic tools"
+# Both are in the default Brewfile, so a miss here is a real failure rather
+# than a skip. They are separate products from separate casks with confusingly
+# similar names: `claude-code` is the CLI, `claude` is the desktop app.
+if command -v claude >/dev/null 2>&1; then
+  ok "claude $(claude --version 2>/dev/null | head -1)"
+  # PATH decides which you get when both exist, and they drift in version.
+  _cpaths="$(which -a claude 2>/dev/null | sort -u)"
+  if [[ "$(printf '%s\n' "$_cpaths" | wc -l | tr -d ' ')" -gt 1 ]]; then
+    bad "more than one claude install: $(printf '%s' "$_cpaths" | tr '\n' ' ')"
+    hint "npm uninstall -g @anthropic-ai/claude-code    # keep the brew cask"
+  fi
+else
+  bad "claude-code CLI not on PATH"
+  hint "brew install --cask claude-code"
+fi
+[[ -d "/Applications/Claude.app" ]] \
+  && ok "Claude.app" \
+  || { bad "Claude.app missing"; hint "brew install --cask claude"; }
+
 hdr "openai tools (opt-in)"
 if [[ ! -d /Applications/ChatGPT.app ]] && ! command -v codex >/dev/null 2>&1; then
   skip "not installed  (./bootstrap.sh --only openai)"

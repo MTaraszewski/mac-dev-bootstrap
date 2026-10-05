@@ -26,7 +26,7 @@ ripgrep  fzf  coreutils  gnu-sed  uv  php
 hashicorp/tap/terraform  terraformer  sops  common-fate/granted/granted
 ```
 
-**Casks** (6) — `iterm2` `font-fira-code` `orbstack` `aws-vault-binary` `claude-code` `vscodium`
+**Casks** (7) — `iterm2` `font-fira-code` `orbstack` `aws-vault-binary` `claude-code` `claude` `vscodium`
 
 **Taps** (2) — `common-fate/granted` `hashicorp/tap` (each gets `brew trust`)
 
