@@ -76,12 +76,36 @@ if (( PLAN )); then
 fi
 
 # ── 1. the cask ──────────────────────────────────────────────────────────
-if [[ -d "/Applications/Ollama.app" ]]; then
-  ok "Ollama.app present"
+# Find where the app actually is. Do NOT rely on `open -a Ollama` by NAME:
+# that resolves through LaunchServices, which frequently has not registered a
+# freshly-installed cask yet. The failure is "Unable to find application named
+# 'Ollama'" on a machine where the app is sitting right there in
+# /Applications — so we locate it ourselves and launch by PATH.
+find_ollama_app() {
+  local p
+  for p in "/Applications/Ollama.app" \
+           "$HOME/Applications/Ollama.app" \
+           "/Applications/Utilities/Ollama.app"; do
+    [[ -d "$p" ]] && { echo "$p"; return 0; }
+  done
+  # Spotlight as a fallback, for a cask that landed somewhere unusual.
+  p="$(mdfind -name "Ollama.app" 2>/dev/null | grep -m1 '/Ollama\.app$')"
+  [[ -n "$p" && -d "$p" ]] && { echo "$p"; return 0; }
+  return 1
+}
+
+if OLLAMA_APP="$(find_ollama_app)"; then
+  ok "Ollama.app at $OLLAMA_APP"
 else
   command -v brew >/dev/null 2>&1 || die "Homebrew missing — run ./bootstrap.sh first"
   log "Installing Ollama from Brewfile.local-ai"
   brew bundle --file="$REPO_DIR/Brewfile.local-ai" || die "ollama-app install failed"
+  # Re-resolve: brew reporting success is not proof of where the app landed,
+  # and continuing without this is what made the old version wait 90 seconds
+  # for an app it had never managed to start.
+  OLLAMA_APP="$(find_ollama_app)" || die \
+    "brew installed ollama-app but no Ollama.app was found. Check: brew info --cask ollama-app"
+  ok "Ollama.app at $OLLAMA_APP"
 fi
 
 # ── 2. environment ───────────────────────────────────────────────────────
@@ -128,8 +152,15 @@ else
   # a password to install its CLI helper. Launched in the background that
   # window is invisible, nobody clicks it, and the API never binds — which
   # looks exactly like a crash. Bring it to the front.
-  log "Launching Ollama"
-  open -a Ollama || warn "couldn't launch Ollama.app"
+  log "Launching $OLLAMA_APP"
+  # By path, with `open "$APP"` as a second attempt. If BOTH fail there is no
+  # point waiting 90 seconds for an API that was never going to bind.
+  if ! open -a "$OLLAMA_APP" 2>/dev/null && ! open "$OLLAMA_APP" 2>/dev/null; then
+    warn "Could not launch $OLLAMA_APP"
+    warn "  Open it from Finder once, finish the first-run prompts, then re-run:"
+    warn "    ./bootstrap.sh --only local-ai"
+    die "Not waiting for an API that was never started."
+  fi
   printf "    waiting for :11434"
   for i in $(seq 1 90); do
     ollama_up && break
