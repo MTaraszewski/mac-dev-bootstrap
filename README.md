@@ -143,7 +143,11 @@ fits 24GB) or `models.big.conf` (~48GB, machines with 48GB+ RAM). Override with
 Two things that decide whether this works at all, both handled here:
 **context is RAM** (the KV cache is ~100KB/token on top of the weights), and
 **Ollama silently truncates** past `num_ctx` instead of erroring — which makes
-an agent loop and look stupid. `modelfiles/agent.Modelfile` is the fix.
+an agent loop and look stupid. The `modelfiles/` are the fix:
+`agent.Modelfile` (16K ctx, FROM `qwen2.5-coder:14b`) for the small tier and
+`agent-big.Modelfile` (32K ctx, FROM `devstral:24b`) for the big one. Only the
+one whose base is actually local gets built; the other is skipped, so neither
+pulls a base you did not ask for.
 
 Decode is bandwidth-bound: tok/s ≈ memory bandwidth ÷ model size. A big model
 cannot be fast, however you configure it.

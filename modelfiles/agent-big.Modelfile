@@ -1,0 +1,51 @@
+# Agent model for machines running models.big.conf (48GB+ of RAM).
+#
+#   ollama create agent-big -f modelfiles/agent-big.Modelfile
+#   (setup-local-ai.sh builds this automatically when the base is local)
+#
+# WHY A SECOND FILE: agent.Modelfile is FROM qwen2.5-coder:14b, which only
+# models.conf pulls. On a big machine that base is never downloaded, so that
+# modelfile is skipped and the num_ctx fix below never gets applied — the one
+# thing these files exist for. This one is FROM a base that models.big.conf
+# actually pulls.
+#
+# Only the file whose FROM base is present gets built. setup-local-ai.sh skips
+# the other with "⊘ needs base", which is correct rather than an error: you do
+# not want it silently pulling a base you did not ask for.
+#
+# ── the problem both files solve ─────────────────────────────────────────
+# Ollama defaults num_ctx to roughly 2-4K tokens. An agent blows past that
+# within a few tool calls. When it overflows, Ollama does NOT error: it
+# SILENTLY TRUNCATES. The agent forgets its own plan, re-reads files it just
+# read, and loops. It looks like a stupid model. It has amnesia.
+#
+# ── the cost: KV cache is RAM ────────────────────────────────────────────
+# devstral:24b is ~14GB of weights. At q8_0 its KV cache is roughly
+# ~130KB/token, so on top of the weights:
+#
+#     32K ctx  ~= 4GB    -> ~18GB resident. Comfortable in a 34GB big slot.
+#     64K ctx  ~= 8GB    -> ~22GB. Fits, but raise the GPU cap first.
+#    128K ctx  ~= 16GB   -> ~30GB. Only with the cap raised and little else.
+#
+# 32K is a good default here: enough for real multi-file work, and it leaves
+# the slot some room. Check reality rather than trusting the arithmetic:
+#     ./scripts/model.sh load agent-big && ./scripts/ram.sh
+
+FROM devstral:24b
+
+PARAMETER num_ctx 32768
+PARAMETER temperature 0.1
+PARAMETER top_p 0.9
+
+# Agents need determinism more than flair — they follow a plan rather than
+# writing prose, and low temperature also reduces malformed tool calls.
+
+SYSTEM """
+You are a coding agent operating on a real repository.
+
+Read before you write. Prefer the smallest change that solves the problem.
+Follow the existing style of the file you are editing.
+State assumptions explicitly. If you are unsure, say so rather than inventing
+an API or a file path.
+After editing, verify: run the test or the command that proves it works.
+"""

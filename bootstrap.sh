@@ -275,7 +275,30 @@ step "done"
 if (( DRY )); then
   echo "  Dry run. Nothing changed. Drop --dry-run to apply."
 else
-  echo "  1. Open a NEW terminal  (nvm, uv, cargo, docker land on PATH there)"
-  echo "  2. ./scripts/doctor.sh  — verify"
-  echo "  3. Merge the theme/plugins block from zsh/zshrc.template into ~/.zshrc"
+  # Only suggest steps that actually apply. An unconditional list ages badly:
+  # it told you to merge the zshrc block on an `--only openai` run, long after
+  # you had already done it, which trains people to ignore the summary.
+  n=0
+  _step() { n=$((n+1)); printf "  %d. %s\n" "$n" "$*"; }
+
+  # A new shell only matters if something that touches PATH ran.
+  if want shell || want runtimes || want orbstack; then
+    _step "Open a NEW terminal  (nvm, uv, cargo, docker land on PATH there)"
+  fi
+
+  _step "./scripts/doctor.sh  — verify"
+
+  # The theme/plugins merge is manual and one-time. Check whether it is still
+  # outstanding rather than nagging forever: oh-my-zsh sourced, and the two
+  # cloned plugins actually enabled in plugins=().
+  if want shell; then
+    _ZSHRC="$HOME/.zshrc"
+    if ! grep -q "oh-my-zsh.sh" "$_ZSHRC" 2>/dev/null \
+       || ! grep -q "zsh-syntax-highlighting" "$_ZSHRC" 2>/dev/null; then
+      _step "Enable the plugins you just installed: copy the theme/plugins block from zsh/zshrc.template into ~/.zshrc"
+      printf "     \033[2m(zsh-autosuggestions and zsh-syntax-highlighting are cloned but not in plugins=() yet)\033[0m\n"
+    fi
+  fi
+
+  (( n )) || echo "  Nothing further. ./scripts/doctor.sh to verify."
 fi

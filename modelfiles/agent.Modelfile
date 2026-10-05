@@ -1,4 +1,8 @@
-# Agent model: same weights as chat, MUCH bigger context window.
+# Agent model for machines running models.conf (under 48GB of RAM).
+# The 48GB+ equivalent is agent-big.Modelfile, FROM devstral:24b — only the
+# one whose FROM base is actually present gets built.
+#
+# Same weights as chat, MUCH bigger context window.
 #
 #   ollama create agent -f modelfiles/agent.Modelfile
 #   (setup-local-ai.sh builds this automatically if the base is present)

@@ -117,11 +117,28 @@ else
 fi
 
 hdr "git"
-NAME="$(git config --global --get user.name 2>/dev/null || true)"
-MAIL="$(git config --global --get user.email 2>/dev/null || true)"
-[[ -n "$NAME" && -n "$MAIL" ]] \
-  && ok "identity: $NAME <$MAIL>" \
-  || { bad "no git identity — commits will fail"; hint "GIT_USER_NAME=... GIT_USER_EMAIL=... ./scripts/setup-git.sh"; }
+# The EFFECTIVE identity, not the global one — this is what the next commit in
+# THIS repo will actually use, after any .git/config override or includeIf.
+# Reporting only the global is misleading on a machine where you deliberately
+# differ per directory, which is exactly when you most want to be sure.
+NAME="$(git config --get user.name  2>/dev/null || true)"
+MAIL="$(git config --get user.email 2>/dev/null || true)"
+if [[ -n "$NAME" && -n "$MAIL" ]]; then
+  ok "identity here: $NAME <$MAIL>"
+  SRC="$(git config --show-origin --get user.email 2>/dev/null | awk '{print $1}')"
+  GMAIL="$(git config --global --get user.email 2>/dev/null || true)"
+  case "$SRC" in
+    file:.git/config|*/.git/config)
+      ok "repo-local override (global is ${GMAIL:-unset})" ;;
+    *)
+      [[ -n "$GMAIL" && "$MAIL" == "$GMAIL" ]] \
+        && printf "      \033[2mfrom your global config\033[0m\n" \
+        || printf "      \033[2mfrom %s\033[0m\n" "${SRC:-unknown}" ;;
+  esac
+else
+  bad "no git identity — commits will fail"
+  hint "GIT_USER_NAME=... GIT_USER_EMAIL=... ./scripts/setup-git.sh"
+fi
 [[ "$(git config --global --get init.defaultBranch 2>/dev/null)" == "main" ]] \
   && ok "init.defaultBranch = main" || skip "init.defaultBranch not set"
 if command -v gh >/dev/null 2>&1; then

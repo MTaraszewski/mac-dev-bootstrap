@@ -44,7 +44,7 @@ resolve() {
   case "$role" in
     code)   candidates="qwen3-coder:30b qwen2.5-coder:14b dev-assistant:latest qwen2.5-coder:7b" ;;
     reason) candidates="deepseek-r1:70b gpt-oss:20b deepseek-r1:14b" ;;
-    agent)  candidates="agent:latest devstral:24b qwen3-coder:30b qwen2.5-coder:14b" ;;
+    agent)  candidates="agent-big:latest agent:latest devstral:24b qwen3-coder:30b qwen2.5-coder:14b" ;;
     *) return 1 ;;
   esac
   for c in $candidates; do
